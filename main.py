@@ -50,8 +50,6 @@ try:
             log.info('Data Extracted and stored for %s.', row['iso'])
         else:
             log.warning('Data could not be extracted for %s.', row['iso'])
-
-
 except Exception as FileNotFoundError:
     log.error("Input file is not placed in the given path.")
 
