@@ -8,12 +8,12 @@ log.basicConfig(level=log.INFO)
 parser = configparser.ConfigParser()
 parser.read("file_info.config")
 
+
 excel_file_input = parser.get('FILE_CONFIG',"input_file")
 excel_file_output = parser.get('FILE_CONFIG',"output_file")
 api = parser.get('API',"url")
+output = None
 
-df = pandas.read_csv(excel_file_input)
-output = pandas.DataFrame()
 
 def fetch_covid_data(date,iso):
     final_dict = dict()
@@ -39,14 +39,29 @@ def fetch_covid_data(date,iso):
 
     return final_dict
 
-for index, row in df.iterrows():
-    final_dict = fetch_covid_data(row['date'],row['iso'])
-    if final_dict:
-        output = output.append(final_dict,ignore_index=True)
-        log.info('Data Extracted and stored for %s.', row['iso'])
-    else:
-        log.warning('Data could not be extracted for %s.',row['iso'])
+try:
+    df = pandas.read_csv(excel_file_input)
+    output = pandas.DataFrame()
 
-output.to_csv(excel_file_output,index=False)
-log.info('DataFrame is written successfully to Excel Sheet.')
+    for index, row in df.iterrows():
+        final_dict = fetch_covid_data(row['date'], row['iso'])
+        if final_dict:
+            output = output.append(final_dict, ignore_index=True)
+            log.info('Data Extracted and stored for %s.', row['iso'])
+        else:
+            log.warning('Data could not be extracted for %s.', row['iso'])
+
+
+except Exception as FileNotFoundError:
+    log.error("Input file is not placed in the given path.")
+
+if output is not None:
+    try:
+        output.to_csv(excel_file_output, index=False)
+        log.info('DataFrame is written successfully to Excel Sheet.')
+    except Exception as FileNotFoundError:
+        log.error("Output file is not placed in the given path.")
+
+
+
 
